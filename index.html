@@ -1,140 +1,199 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Utherverse Sign Dice</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #111827;
-            color: #ffffff;
-            text-align: center;
-            padding: 10px;
-            margin: 0;
-            overflow: hidden; /* Voorkomt lelijke scrollbalken op je sign */
-        }
+<meta charset="UTF-8">
+<title>3D Animated Dice Roller</title>
 
-        h1 {
-            font-size: 18px;
-            margin: 5px 0 15px 0;
-            color: #93c5fd;
-        }
+<style>
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #1e293b; /* Donkerblauwe/grijze moderne achtergrond */
+        color: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+    }
 
-        .instruction {
-            font-size: 13px;
-            color: #94a3b8;
-            margin-bottom: 15px;
-        }
+    h1 {
+        margin-bottom: 2rem;
+        font-weight: 600;
+        font-size: 28px;
+    }
 
-        .dice-container {
-            display: block;
-            margin-bottom: 15px;
-        }
+    /* Het gebied waar de dobbelstenen rollen */
+    .dice-area {
+        display: flex;
+        justify-content: center;
+        gap: 40px;
+        margin-bottom: 3rem;
+        min-height: 120px;
+        perspective: 900px;
+    }
 
-        /* Grote, makkelijk klikbare dobbelsteen voor in-world signs */
-        .classic-die {
-            display: inline-block;
-            width: 100px;
-            height: 100px;
-            background-color: #ffffff;
-            color: #000000;
-            border-radius: 12px;
-            border: 3px solid #3b82f6;
-            margin: 0 10px;
-            font-size: 55px;
-            line-height: 100px;
-            font-weight: bold;
-            text-align: center;
-            cursor: pointer; /* Zorgt dat de muisaanwijzer verandert in-world */
-        }
+    /* Jouw werkende 3D Cube instellingen */
+    .dice {
+        width: 100px;
+        height: 100px;
+        position: relative;
+        transform-style: preserve-3d;
+        transition: transform 1.2s ease-out;
+    }
 
-        /* Extra duidelijke switch-knoppen onderaan die we via ID aansturen */
-        .mode-btn {
-            background-color: #374151;
-            color: #f3f4f6;
-            border: 1px solid #4b5563;
-            padding: 8px 15px;
-            font-size: 12px;
-            border-radius: 4px;
-            margin: 0 5px;
-            cursor: pointer;
-        }
-        .mode-btn.active {
-            background-color: #3b82f6;
-            border-color: #2563eb;
-        }
-    </style>
+    /* Strakke witte dobbelsteenvlakken met ronde hoeken */
+    .face {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        background: #ffffff;
+        border: 2px solid #cbd5e1;
+        border-radius: 12px;
+        box-sizing: border-box;
+    }
+
+    /* De strakke ronde stippen */
+    .pip {
+        width: 16px;
+        height: 16px;
+        background: #0f172a; /* Donkere stipkleur */
+        border-radius: 50%;
+        position: absolute;
+    }
+
+    /* Exacte posities voor de stippen op het vlak */
+    .tl { top: 16px; left: 16px; }
+    .tr { top: 16px; right: 16px; }
+    .bl { bottom: 16px; left: 16px; }
+    .br { bottom: 16px; right: 16px; }
+    .c  { top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .ml { top: 50%; left: 16px; transform: translateY(-50%); }
+    .mr { top: 50%; right: 16px; transform: translateY(-50%); }
+
+    /* Jouw 3D rotaties om de kubus te bouwen */
+    .front  { transform: rotateY(0deg) translateZ(50px); }
+    .back   { transform: rotateY(180deg) translateZ(50px); }
+    .right  { transform: rotateY(90deg) translateZ(50px); }
+    .left   { transform: rotateY(-90deg) translateZ(50px); }
+    .top    { transform: rotateX(90deg) translateZ(50px); }
+    .bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+    /* De controls en blauwe knoppen uit de mooie layout */
+    .controls {
+        display: flex;
+        gap: 15px;
+    }
+
+    button {
+        background-color: #3b82f6;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        transition: all 0.2s ease;
+    }
+
+    button:hover {
+        background-color: #2563eb;
+        transform: translateY(-2px);
+    }
+
+    button:active {
+        transform: translateY(0);
+    }
+</style>
 </head>
+
 <body>
 
-    <h1>Dobbelsteen Roller</h1>
-    <div class="instruction">Klik op een dobbelsteen om te rollen!</div>
+<h1>3D Dice Roller</h1>
 
-    <!-- De dobbelstenen zelf zijn nu de knoppen -->
-    <div class="dice-container" id="diceContainer"></div>
+<!-- Het dobbelsteengebied staat nu boven de knoppen -->
+<div id="diceArea" class="dice-area"></div>
 
-    <div>
-        <span id="btn1" class="mode-btn active">Gebruik 1 Dobbelsteen</span>
-        <span id="btn2" class="mode-btn">Gebruik 2 Dobbelstenen</span>
-    </div>
+<!-- De twee aparte knoppen in plaats van het selectiemenu -->
+<div class="controls">
+    <button onclick="rollDice(1)">Roll 1 Dice</button>
+    <button onclick="rollDice(2)">Roll 2 Dice</button>
+</div>
 
-    <script>
-        let huidigeAantal = 1;
-        let isRolling = false;
+<script>
+function createFace(pips, cls) {
+    const face = document.createElement("div");
+    face.className = "face " + cls;
 
-        // Luister naar de modus-knoppen via een veilige methode voor Utherverse
-        document.getElementById('btn1').onmousedown = function() { changeMode(1); };
-        document.getElementById('btn2').onmousedown = function() { changeMode(2); };
+    pips.forEach(p => {
+        const pip = document.createElement("div");
+        pip.className = "pip " + p;
+        face.appendChild(pip);
+    });
 
-        function changeMode(aantal) {
-            if (isRolling) return;
-            huidigeAantal = aantal;
-            document.getElementById('btn1').className = (aantal === 1) ? 'mode-btn active' : 'mode-btn';
-            document.getElementById('btn2').className = (aantal === 2) ? 'mode-btn active' : 'mode-btn';
-            setupDice();
-        }
+    return face;
+}
 
-        function setupDice() {
-            const container = document.getElementById('diceContainer');
-            container.innerHTML = ''; 
+function createDice() {
+    const dice = document.createElement("div");
+    dice.className = "dice";
 
-            for (let i = 0; i < huidigeAantal; i++) {
-                const die = document.createElement('div');
-                die.className = 'classic-die';
-                die.innerHTML = Math.floor(Math.random() * 6) + 1;
-                
-                // Muisklik-actie speciaal voor 3D signs (onmousedown werkt vaak beter dan onclick in vws clients)
-                die.onmousedown = function() {
-                    triggerRoll();
-                };
+    const faces = [
+        { cls: "front",  p: ["c"] },                         // 1
+        { cls: "back",   p: ["tl","tr","ml","mr","bl","br"] }, // 6
+        { cls: "right",  p: ["tl","c","br"] },               // 3
+        { cls: "left",   p: ["tl","tr","bl","br"] },         // 4
+        { cls: "top",    p: ["tl","tr","c","bl","br"] },     // 5
+        { cls: "bottom", p: ["tl","br"] }                    // 2
+    ];
 
-                container.appendChild(die);
-            }
-        }
+    faces.forEach(f => dice.appendChild(createFace(f.p, f.cls)));
 
-        function triggerRoll() {
-            if (isRolling) return;
-            isRolling = true;
+    return dice;
+}
 
-            const diceElements = document.getElementsByClassName('classic-die');
-            let lussen = 0;
-            const maxLussen = 10;
-            
-            const interval = setInterval(function() {
-                for (let i = 0; i < diceElements.length; i++) {
-                    diceElements[i].innerHTML = Math.floor(Math.random() * 6) + 1;
-                }
-                lussen++;
-                
-                if (lussen >= maxLussen) {
-                    clearInterval(interval);
-                    isRolling = false;
-                }
-            }, 80);
-        }
+// Aangepast zodat hij het aantal (count) direct vanuit de geklikte knop doorkrijgt
+function rollDice(count) {
+    const area = document.getElementById("diceArea");
+    area.innerHTML = "";
 
-        // Start de eerste dobbelsteen op het scherm
-        setupDice();
-    </script>
+    for (let i = 0; i < count; i++) {
+        const dice = createDice();
+        area.appendChild(dice);
+
+        const result = Math.floor(Math.random() * 6) + 1;
+
+        const base = {
+            1: {x: 0,   y: 0},
+            2: {x: -90, y: 0},
+            3: {x: 0,   y: 90},
+            4: {x: 0,   y: -90},
+            5: {x: 90,  y: 0},
+            6: {x: 180, y: 0}
+        };
+
+        const extraX = 360 * (Math.floor(Math.random() * 4) + 1);
+        const extraY = 360 * (Math.floor(Math.random() * 4) + 1);
+        const extraZ = 360 * (Math.floor(Math.random() * 4) + 1);
+
+        const finalX = base[result].x + extraX;
+        const finalY = base[result].y + extraY;
+        const finalZ = extraZ;
+
+        setTimeout(() => {
+            dice.style.transform =
+                `rotateX(${finalX}deg) rotateY(${finalY}deg) rotateZ(${finalZ}deg)`;
+        }, 50);
+    }
+}
+
+// Laat alvast 1 dobbelsteen zien als de pagina voor het eerst laadt
+window.onload = function() {
+    rollDice(1);
+};
+</script>
+
 </body>
 </html>
