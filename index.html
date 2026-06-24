@@ -5,40 +5,14 @@
 <title>3D Dice Roller</title>
 
 <style>
-    /* Exact dezelfde opbouw als jouw werkende groene code, alleen met de nieuwe kleuren */
     body {
-        background: #1e293b; /* De donkere achtergrond */
+        background: #1e293b; /* Jouw gewenste donkere achtergrond */
         font-family: Arial, sans-serif;
         text-align: center;
         padding-top: 40px;
         color: white;
-        margin: 0;
     }
 
-    /* Ruimte voor de knoppen, geplaatst boven de dobbelstenen */
-    .controls {
-        margin-top: 20px;
-        margin-bottom: 30px;
-    }
-
-    /* De mooie blauwe knoppen layout */
-    button {
-        padding: 12px 24px;
-        font-size: 18px;
-        border-radius: 8px;
-        border: none;
-        cursor: pointer;
-        background-color: #3b82f6;
-        color: white;
-        font-weight: bold;
-        margin: 0 10px;
-    }
-
-    button:hover {
-        background-color: #2563eb;
-    }
-
-    /* Het dobbelsteengebied exact overgenomen uit jouw werkende code */
     .dice-area {
         display: flex;
         justify-content: center;
@@ -62,19 +36,16 @@
         background: white;
         border: 3px solid #222;
         border-radius: 10px;
-        box-sizing: border-box;
     }
 
-    /* De strakke ronde stippen */
     .pip {
         width: 18px;
         height: 18px;
-        background: black;
+        background: black; /* De zwarte stippen */
         border-radius: 50%;
         position: absolute;
     }
 
-    /* Exacte posities van de stippen */
     .tl { top: 15px; left: 15px; }
     .tr { top: 15px; right: 15px; }
     .bl { bottom: 15px; left: 15px; }
@@ -83,13 +54,25 @@
     .ml { top: 50%; left: 15px; transform: translateY(-50%); }
     .mr { top: 50%; right: 15px; transform: translateY(-50%); }
 
-    /* 3D rotaties */
     .front  { transform: rotateY(0deg) translateZ(50px); }
     .back   { transform: rotateY(180deg) translateZ(50px); }
     .right  { transform: rotateY(90deg) translateZ(50px); }
     .left   { transform: rotateY(-90deg) translateZ(50px); }
     .top    { transform: rotateX(90deg) translateZ(50px); }
     .bottom { transform: rotateX(-90deg) translateZ(50px); }
+
+    /* Jouw knoppen-styling, alleen met de nieuwe blauwe kleuren */
+    button {
+        padding: 10px 18px;
+        font-size: 18px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        background: #3b82f6; /* Blauw */
+        color: white;        /* Witte tekst */
+        font-weight: bold;
+        margin: 0 10px;      /* Ruimte tussen de twee knoppen */
+    }
 </style>
 </head>
 
@@ -97,11 +80,9 @@
 
 <h1>3D Dice Roller</h1>
 
-<!-- De twee knoppen staan nu weer VEILIG bovenaan, net als in jouw werkende bestand -->
-<div class="controls">
-    <button onclick="roll1()">Roll 1 Dice</button>
-    <button onclick="roll2()">Roll 2 Dice</button>
-</div>
+<!-- De twee knoppen los naast elkaar, exact op de plek van jouw oude menu -->
+<button onclick="rollDice(1)">Roll 1 Dice</button>
+<button onclick="rollDice(2)">Roll 2 Dice</button>
 
 <div id="diceArea" class="dice-area"></div>
 
@@ -137,8 +118,8 @@ function createDice() {
     return dice;
 }
 
-/* Veilige verwerkingsfunctie zonder ingewikkelde inline parameters */
-function executeRoll(count) {
+/* Accepteert nu direct het aantal (1 of 2) vanuit de knop */
+function rollDice(count) {
     const area = document.getElementById("diceArea");
     area.innerHTML = "";
 
@@ -170,15 +151,6 @@ function executeRoll(count) {
                 `rotateX(${finalX}deg) rotateY(${finalY}deg) rotateZ(${finalZ}deg)`;
         }, 50);
     }
-}
-
-/* Twee aparte simpele functies die Utherverse Classic probleemloos begrijpt bij een klik */
-function roll1() {
-    executeRoll(1);
-}
-
-function roll2() {
-    executeRoll(2);
 }
 </script>
 
