@@ -2,115 +2,139 @@
 <html lang="nl">
 <head>
     <meta charset="UTF-8">
-    <title>Utherverse Classic Dice Roller</title>
+    <title>Utherverse Sign Dice</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #1e293b;
+            background: #111827;
             color: #ffffff;
             text-align: center;
-            padding: 20px;
+            padding: 10px;
             margin: 0;
+            overflow: hidden; /* Voorkomt lelijke scrollbalken op je sign */
         }
 
         h1 {
-            font-size: 22px;
-            margin-bottom: 20px;
+            font-size: 18px;
+            margin: 5px 0 15px 0;
+            color: #93c5fd;
         }
 
-        /* Container voor de dobbelstenen naast elkaar */
+        .instruction {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 15px;
+        }
+
         .dice-container {
             display: block;
-            min-height: 120px;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
         }
 
-        /* Klassieke 2D dobbelsteen die overal werkt */
+        /* Grote, makkelijk klikbare dobbelsteen voor in-world signs */
         .classic-die {
             display: inline-block;
-            width: 90px;
-            height: 90px;
+            width: 100px;
+            height: 100px;
             background-color: #ffffff;
             color: #000000;
-            border-radius: 10px;
-            border: 2px solid #cbd5e1;
-            margin: 0 15px;
-            font-size: 50px;
-            line-height: 90px;
+            border-radius: 12px;
+            border: 3px solid #3b82f6;
+            margin: 0 10px;
+            font-size: 55px;
+            line-height: 100px;
             font-weight: bold;
             text-align: center;
-            box-shadow: 0px 4px 6px rgba(0,0,0,0.3);
+            cursor: pointer; /* Zorgt dat de muisaanwijzer verandert in-world */
         }
 
-        .controls {
-            margin-top: 20px;
-        }
-
-        /* Simpele knoppen zonder zware CSS3 effecten */
-        button {
-            background-color: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 6px;
+        /* Extra duidelijke switch-knoppen onderaan die we via ID aansturen */
+        .mode-btn {
+            background-color: #374151;
+            color: #f3f4f6;
+            border: 1px solid #4b5563;
+            padding: 8px 15px;
+            font-size: 12px;
+            border-radius: 4px;
+            margin: 0 5px;
             cursor: pointer;
-            margin: 5px;
         }
-
-        button:hover {
-            background-color: #2563eb;
+        .mode-btn.active {
+            background-color: #3b82f6;
+            border-color: #2563eb;
         }
     </style>
 </head>
 <body>
 
     <h1>Dobbelsteen Roller</h1>
+    <div class="instruction">Klik op een dobbelsteen om te rollen!</div>
 
-    <div class="dice-container" id="diceContainer">
-        <!-- Start met 1 dobbelsteen op het scherm -->
-        <div class="classic-die">6</div>
-    </div>
+    <!-- De dobbelstenen zelf zijn nu de knoppen -->
+    <div class="dice-container" id="diceContainer"></div>
 
-    <div class="controls">
-        <button onclick="rollDice(1)">Roll 1 Dice</button>
-        <button onclick="rollDice(2)">Roll 2 Dice</button>
+    <div>
+        <span id="btn1" class="mode-btn active">Gebruik 1 Dobbelsteen</span>
+        <span id="btn2" class="mode-btn">Gebruik 2 Dobbelstenen</span>
     </div>
 
     <script>
-        function rollDice(count) {
-            const container = document.getElementById('diceContainer');
-            container.innerHTML = ''; // Maak de container leeg
+        let huidigeAantal = 1;
+        let isRolling = false;
 
-            // Maak direct het juiste aantal dobbelstenen aan
-            const diceElements = [];
-            for (let i = 0; i < count; i++) {
+        // Luister naar de modus-knoppen via een veilige methode voor Utherverse
+        document.getElementById('btn1').onmousedown = function() { changeMode(1); };
+        document.getElementById('btn2').onmousedown = function() { changeMode(2); };
+
+        function changeMode(aantal) {
+            if (isRolling) return;
+            huidigeAantal = aantal;
+            document.getElementById('btn1').className = (aantal === 1) ? 'mode-btn active' : 'mode-btn';
+            document.getElementById('btn2').className = (aantal === 2) ? 'mode-btn active' : 'mode-btn';
+            setupDice();
+        }
+
+        function setupDice() {
+            const container = document.getElementById('diceContainer');
+            container.innerHTML = ''; 
+
+            for (let i = 0; i < huidigeAantal; i++) {
                 const die = document.createElement('div');
                 die.className = 'classic-die';
-                die.innerHTML = '?';
-                container.appendChild(die);
-                diceElements.push(die);
-            }
+                die.innerHTML = Math.floor(Math.random() * 6) + 1;
+                
+                // Muisklik-actie speciaal voor 3D signs (onmousedown werkt vaak beter dan onclick in vws clients)
+                die.onmousedown = function() {
+                    triggerRoll();
+                };
 
-            // De "Roll" animatie: wisselt heel snel van getal (flits-effect)
+                container.appendChild(die);
+            }
+        }
+
+        function triggerRoll() {
+            if (isRolling) return;
+            isRolling = true;
+
+            const diceElements = document.getElementsByClassName('classic-die');
             let lussen = 0;
-            const maxLussen = 12; // Hoe vaak hij flitst voor hij stopt
+            const maxLussen = 10;
             
             const interval = setInterval(function() {
-                // Geef elke dobbelsteen een willekeurig tijdelijk getal
                 for (let i = 0; i < diceElements.length; i++) {
                     diceElements[i].innerHTML = Math.floor(Math.random() * 6) + 1;
                 }
-                
                 lussen++;
                 
-                // Als de animatie klaar is, stoppen we op het definitieve getal
                 if (lussen >= maxLussen) {
                     clearInterval(interval);
+                    isRolling = false;
                 }
-            }, 70); // Snelheid van het flitsen (70 milliseconden)
+            }, 80);
         }
+
+        // Start de eerste dobbelsteen op het scherm
+        setupDice();
     </script>
 </body>
 </html>
