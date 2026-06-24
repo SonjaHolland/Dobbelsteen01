@@ -2,38 +2,51 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>3D Animated Dice Roller</title>
+<title>3D Dice Roller</title>
 
 <style>
+    /* Exact dezelfde opbouw als jouw werkende groene code, alleen met de nieuwe kleuren */
     body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #1e293b; /* Donkerblauwe/grijze moderne achtergrond */
-        color: #f8fafc;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        min-height: 100vh;
+        background: #1e293b; /* De donkere achtergrond */
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding-top: 40px;
+        color: white;
         margin: 0;
     }
 
-    h1 {
-        margin-bottom: 2rem;
-        font-weight: 600;
-        font-size: 28px;
+    /* Ruimte voor de knoppen, geplaatst boven de dobbelstenen */
+    .controls {
+        margin-top: 20px;
+        margin-bottom: 30px;
     }
 
-    /* Het gebied waar de dobbelstenen rollen */
+    /* De mooie blauwe knoppen layout */
+    button {
+        padding: 12px 24px;
+        font-size: 18px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        background-color: #3b82f6;
+        color: white;
+        font-weight: bold;
+        margin: 0 10px;
+    }
+
+    button:hover {
+        background-color: #2563eb;
+    }
+
+    /* Het dobbelsteengebied exact overgenomen uit jouw werkende code */
     .dice-area {
         display: flex;
         justify-content: center;
         gap: 40px;
-        margin-bottom: 3rem;
-        min-height: 120px;
+        margin-top: 30px;
         perspective: 900px;
     }
 
-    /* Jouw werkende 3D Cube instellingen */
     .dice {
         width: 100px;
         height: 100px;
@@ -42,70 +55,41 @@
         transition: transform 1.2s ease-out;
     }
 
-    /* Strakke witte dobbelsteenvlakken met ronde hoeken */
     .face {
         position: absolute;
         width: 100px;
         height: 100px;
-        background: #ffffff;
-        border: 2px solid #cbd5e1;
-        border-radius: 12px;
+        background: white;
+        border: 3px solid #222;
+        border-radius: 10px;
         box-sizing: border-box;
     }
 
     /* De strakke ronde stippen */
     .pip {
-        width: 16px;
-        height: 16px;
-        background: #0f172a; /* Donkere stipkleur */
+        width: 18px;
+        height: 18px;
+        background: black;
         border-radius: 50%;
         position: absolute;
     }
 
-    /* Exacte posities voor de stippen op het vlak */
-    .tl { top: 16px; left: 16px; }
-    .tr { top: 16px; right: 16px; }
-    .bl { bottom: 16px; left: 16px; }
-    .br { bottom: 16px; right: 16px; }
+    /* Exacte posities van de stippen */
+    .tl { top: 15px; left: 15px; }
+    .tr { top: 15px; right: 15px; }
+    .bl { bottom: 15px; left: 15px; }
+    .br { bottom: 15px; right: 15px; }
     .c  { top: 50%; left: 50%; transform: translate(-50%, -50%); }
-    .ml { top: 50%; left: 16px; transform: translateY(-50%); }
-    .mr { top: 50%; right: 16px; transform: translateY(-50%); }
+    .ml { top: 50%; left: 15px; transform: translateY(-50%); }
+    .mr { top: 50%; right: 15px; transform: translateY(-50%); }
 
-    /* Jouw 3D rotaties om de kubus te bouwen */
+    /* 3D rotaties */
     .front  { transform: rotateY(0deg) translateZ(50px); }
     .back   { transform: rotateY(180deg) translateZ(50px); }
     .right  { transform: rotateY(90deg) translateZ(50px); }
     .left   { transform: rotateY(-90deg) translateZ(50px); }
     .top    { transform: rotateX(90deg) translateZ(50px); }
     .bottom { transform: rotateX(-90deg) translateZ(50px); }
-
-    /* De controls en blauwe knoppen uit de mooie layout */
-    .controls {
-        display: flex;
-        gap: 15px;
-    }
-
-    button {
-        background-color: #3b82f6;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        font-size: 1rem;
-        font-weight: 600;
-        border-radius: 8px;
-        cursor: pointer;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        transition: all 0.2s ease;
-    }
-
-    button:hover {
-        background-color: #2563eb;
-        transform: translateY(-2px);
-    }
-
-    button:active {
-        transform: translateY(0);
-    }
 </style>
 </head>
 
@@ -113,14 +97,13 @@
 
 <h1>3D Dice Roller</h1>
 
-<!-- Het dobbelsteengebied staat nu boven de knoppen -->
-<div id="diceArea" class="dice-area"></div>
-
-<!-- De twee aparte knoppen in plaats van het selectiemenu -->
+<!-- De twee knoppen staan nu weer VEILIG bovenaan, net als in jouw werkende bestand -->
 <div class="controls">
-    <button onclick="rollDice(1)">Roll 1 Dice</button>
-    <button onclick="rollDice(2)">Roll 2 Dice</button>
+    <button onclick="roll1()">Roll 1 Dice</button>
+    <button onclick="roll2()">Roll 2 Dice</button>
 </div>
+
+<div id="diceArea" class="dice-area"></div>
 
 <script>
 function createFace(pips, cls) {
@@ -154,8 +137,8 @@ function createDice() {
     return dice;
 }
 
-// Aangepast zodat hij het aantal (count) direct vanuit de geklikte knop doorkrijgt
-function rollDice(count) {
+/* Veilige verwerkingsfunctie zonder ingewikkelde inline parameters */
+function executeRoll(count) {
     const area = document.getElementById("diceArea");
     area.innerHTML = "";
 
@@ -189,10 +172,14 @@ function rollDice(count) {
     }
 }
 
-// Laat alvast 1 dobbelsteen zien als de pagina voor het eerst laadt
-window.onload = function() {
-    rollDice(1);
-};
+/* Twee aparte simpele functies die Utherverse Classic probleemloos begrijpt bij een klik */
+function roll1() {
+    executeRoll(1);
+}
+
+function roll2() {
+    executeRoll(2);
+}
 </script>
 
 </body>
